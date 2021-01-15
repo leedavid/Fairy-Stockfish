@@ -58,6 +58,7 @@ struct StateInfo {
   Bitboard   checkersBB;
   Piece      capturedPiece;
   Piece      unpromotedCapturedPiece;
+  Piece      blast[SQUARE_NB];
   StateInfo* previous;
   Bitboard   blockersForKing[COLOR_NB];
   Bitboard   pinners[COLOR_NB];
@@ -122,6 +123,7 @@ public:
   bool mandatory_pawn_promotion() const;
   bool mandatory_piece_promotion() const;
   bool piece_demotion() const;
+  bool blast_on_capture() const;
   bool endgame_eval() const;
   bool double_step_enabled() const;
   Rank double_step_rank_max() const;
@@ -420,6 +422,11 @@ inline bool Position::mandatory_piece_promotion() const {
 inline bool Position::piece_demotion() const {
   assert(var != nullptr);
   return var->pieceDemotion;
+}
+
+inline bool Position::blast_on_capture() const {
+  assert(var != nullptr);
+  return var->blastOnCapture;
 }
 
 inline bool Position::endgame_eval() const {

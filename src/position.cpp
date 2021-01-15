@@ -1590,6 +1590,44 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
           st->gatesBB[us] = 0;
   }
 
+  // Remove the blast pieces
+  if (captured && blast_on_capture())
+  {
+      std::memset(st->blast, 0, sizeof(st->blast));
+      Bitboard blast = (attacks_bb<KING>(to) & (pieces() ^ pieces(PAWN))) | to;
+      while (blast)
+      {
+          Square bsq = pop_lsb(&blast);
+          Piece bpc = piece_on(bsq);
+          Color bc = color_of(bpc);
+          st->nonPawnMaterial[bc] -= PieceValue[MG][bpc];
+
+          // Update board and piece lists
+          st->blast[bsq] = bpc;
+          remove_piece(bsq);
+          board[bsq] = NO_PIECE;
+          if (captures_to_hand())
+          {
+              Piece pieceToHand = ~bpc;
+              add_to_hand(pieceToHand);
+              k ^=  Zobrist::inHand[pieceToHand][pieceCountInHand[color_of(pieceToHand)][type_of(pieceToHand)] - 1]
+                  ^ Zobrist::inHand[pieceToHand][pieceCountInHand[color_of(pieceToHand)][type_of(pieceToHand)]];
+          }
+
+          // Update material hash key
+          k ^= Zobrist::psq[bpc][bsq];
+          st->materialKey ^= Zobrist::psq[bpc][pieceCount[bpc]];
+
+          // Update castling rights if needed
+          if (st->castlingRights && castlingRightsMask[bsq])
+          {
+              int cr = castlingRightsMask[bsq];
+              k ^= Zobrist::castling[st->castlingRights & cr];
+              st->castlingRights &= ~cr;
+          }
+      }
+  }
+
   // Update the key with the final value
   st->key = k;
   // Calculate checkers bitboard (if move gives check)
@@ -1649,6 +1687,25 @@ void Position::undo_move(Move m) {
          || (type_of(m) == PROMOTION && sittuyin_promotion())
          || (is_pass(m) && pass()));
   assert(type_of(st->capturedPiece) != KING);
+
+  // Add the blast pieces
+  if (st->capturedPiece && blast_on_capture())
+  {
+      Bitboard blast = attacks_bb<KING>(to) | to;
+      while (blast)
+      {
+          Square bsq = pop_lsb(&blast);
+          Piece bpc = st->blast[bsq];
+
+          // Update board and piece lists
+          if (bpc)
+          {
+              put_piece(bpc, bsq);
+              if (captures_to_hand())
+                  remove_from_hand(~bpc);
+          }
+      }
+  }
 
   // Remove gated piece
   if (is_gating(m))
@@ -1882,7 +1939,8 @@ bool Position::see_ge(Move m, Value threshold) const {
               && count<ALL_PIECES>(~sideToMove) == extinction_piece_count() + 1)))
       return extinction_value() < VALUE_ZERO;
 
-  if (must_capture() || !checking_permitted() || is_gating(m) || count<CLOBBER_PIECE>() == count<ALL_PIECES>())
+  // Do not evaluate SEE if value would be unreliable
+  if (blast_on_capture() || must_capture() || !checking_permitted() || is_gating(m) || count<CLOBBER_PIECE>() == count<ALL_PIECES>())
       return VALUE_ZERO >= threshold;
 
   int swap = PieceValue[MG][piece_on(to)] - threshold;
@@ -2117,7 +2175,7 @@ bool Position::is_immediate_game_end(Value& result, int ply) const {
   // extinction
   if (extinction_value() != VALUE_NONE)
   {
-      for (Color c : { WHITE, BLACK })
+      for (Color c : { ~sideToMove, sideToMove })
           for (PieceType pt : extinction_piece_types())
               if (   count_with_hand( c, pt) <= var->extinctionPieceCount
                   && count_with_hand(~c, pt) >= var->extinctionOpponentPieceCount + (extinction_claim() && c == sideToMove))

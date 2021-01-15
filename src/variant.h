@@ -54,6 +54,7 @@ struct Variant {
   bool mandatoryPawnPromotion = true;
   bool mandatoryPiecePromotion = false;
   bool pieceDemotion = false;
+  bool blastOnCapture = false;
   bool endgameEval = false;
   bool doubleStep = true;
   Rank doubleStepRank = RANK_2;
