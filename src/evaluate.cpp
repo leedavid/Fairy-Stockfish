@@ -857,12 +857,17 @@ namespace {
     if (pos.extinction_value() == -VALUE_MATE)
     {
         Bitboard bExt = attackedBy[Us][ALL_PIECES] & pos.pieces(Them);
-        while (bExt)
+        Bitboard bExtBlast = !pos.blast_on_capture() ? Bitboard(0) :
+                     shift<NORTH>(bExt) | shift<NORTH_EAST>(bExt) | shift<NORTH_WEST>(bExt)
+                   | shift<SOUTH>(bExt) | shift<SOUTH_EAST>(bExt) | shift<SOUTH_WEST>(bExt)
+                   | shift<EAST>(bExt) | shift<WEST>(bExt);
+        for (PieceType pt : pos.extinction_piece_types())
         {
-            PieceType pt = type_of(pos.piece_on(pop_lsb(&bExt)));
+            if (pt == ALL_PIECES)
+                continue;
             int denom = std::max(pos.count_with_hand(Them, pt) - pos.extinction_piece_count(), 1);
-            if (pos.extinction_piece_types().find(pt) != pos.extinction_piece_types().end())
-                score += make_score(1000, 1000) / (denom * denom);
+            score += make_score(1000, 1000) / (denom * denom) * popcount(bExt & pos.pieces(Them, pt));
+            score += make_score(300, 300) / (denom * denom) * popcount(bExtBlast & pos.pieces(Them, pt));
         }
     }
 
