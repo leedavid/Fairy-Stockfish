@@ -1600,7 +1600,8 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
           Square bsq = pop_lsb(&blast);
           Piece bpc = piece_on(bsq);
           Color bc = color_of(bpc);
-          st->nonPawnMaterial[bc] -= PieceValue[MG][bpc];
+          if (type_of(bpc) != PAWN)
+              st->nonPawnMaterial[bc] -= PieceValue[MG][bpc];
 
           // Update board and piece lists
           st->blast[bsq] = bpc;
@@ -1617,6 +1618,8 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
           // Update material hash key
           k ^= Zobrist::psq[bpc][bsq];
           st->materialKey ^= Zobrist::psq[bpc][pieceCount[bpc]];
+          if (type_of(bpc) == PAWN)
+              st->pawnKey ^= Zobrist::psq[bpc][bsq];
 
           // Update castling rights if needed
           if (st->castlingRights && castlingRightsMask[bsq])
