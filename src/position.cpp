@@ -1593,7 +1593,8 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
   // Remove the blast pieces
   if (captured && blast_on_capture())
   {
-      std::memset(st->blast, 0, sizeof(st->blast));
+      std::memset(st->unpromotedBycatch, 0, sizeof(st->unpromotedBycatch));
+      st->demotedBycatch = st->promotedBycatch = 0;
       Bitboard blast = (attacks_bb<KING>(to) & (pieces() ^ pieces(PAWN))) | to;
       while (blast)
       {
@@ -1604,12 +1605,23 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
               st->nonPawnMaterial[bc] -= PieceValue[MG][bpc];
 
           // Update board and piece lists
-          st->blast[bsq] = bpc;
+          // In order to not have to store the values of both board and unpromotedBoard,
+          // demote promoted pieces, but keep promoted pawns as promoted,
+          // and store demotion/promotion bitboards to disambiguate the piece state
+          bool capturedPromoted = is_promoted(bsq);
+          Piece unpromotedCaptured = unpromoted_piece_on(bsq);
+          st->unpromotedBycatch[bsq] = unpromotedCaptured ? unpromotedCaptured : bpc;
+          if (unpromotedCaptured)
+              st->demotedBycatch |= bsq;
+          else if (capturedPromoted)
+              st->promotedBycatch |= bsq;
           remove_piece(bsq);
           board[bsq] = NO_PIECE;
           if (captures_to_hand())
           {
-              Piece pieceToHand = ~bpc;
+              Piece pieceToHand = !capturedPromoted || drop_loop() ? ~bpc
+                                 : unpromotedCaptured ? ~unpromotedCaptured
+                                                      : make_piece(~color_of(bpc), PAWN);
               add_to_hand(pieceToHand);
               k ^=  Zobrist::inHand[pieceToHand][pieceCountInHand[color_of(pieceToHand)][type_of(pieceToHand)] - 1]
                   ^ Zobrist::inHand[pieceToHand][pieceCountInHand[color_of(pieceToHand)][type_of(pieceToHand)]];
@@ -1698,14 +1710,18 @@ void Position::undo_move(Move m) {
       while (blast)
       {
           Square bsq = pop_lsb(&blast);
-          Piece bpc = st->blast[bsq];
+          Piece unpromotedBpc = st->unpromotedBycatch[bsq];
+          Piece bpc = st->demotedBycatch & bsq ? make_piece(color_of(unpromotedBpc), promoted_piece_type(type_of(unpromotedBpc)))
+                                               : unpromotedBpc;
+          bool isPromoted = (st->promotedBycatch | st->demotedBycatch) & bsq;
 
           // Update board and piece lists
           if (bpc)
           {
-              put_piece(bpc, bsq);
+              put_piece(bpc, bsq, isPromoted, st->demotedBycatch & bsq ? unpromotedBpc : NO_PIECE);
               if (captures_to_hand())
-                  remove_from_hand(~bpc);
+                  remove_from_hand(!drop_loop() && (st->promotedBycatch & bsq) ? make_piece(~color_of(unpromotedBpc), PAWN)
+                                                                               : ~unpromotedBpc);
           }
       }
   }
