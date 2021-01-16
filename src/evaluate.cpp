@@ -867,7 +867,7 @@ namespace {
                 continue;
             int denom = std::max(pos.count_with_hand(Them, pt) - pos.extinction_piece_count(), 1);
             score += make_score(1000, 1000) / (denom * denom) * popcount(bExt & pos.pieces(Them, pt));
-            score += make_score(300, 300) / (denom * denom) * popcount(bExtBlast & pos.pieces(Them, pt));
+            score += make_score(1000,  500) / (denom * denom) * popcount(bExtBlast & pos.pieces(Them, pt));
         }
     }
 
