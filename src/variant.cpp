@@ -301,11 +301,10 @@ namespace {
         v->blastOnCapture = true;
         return v;
     }
-    Variant* atomichouse_variant() {
+    Variant* atomic_variant() {
         Variant* v = nocheckatomic_variant();
-        v->startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR[] w KQkq - 0 1";
-        v->pieceDrops = true;
-        v->capturesToHand = true;
+        // TODO: castling, check(-mate), stalemate
+        v->extinctionPseudoRoyal = true;
         return v;
     }
     Variant* threecheck_variant() {
@@ -697,16 +696,6 @@ namespace {
         v->promotedPieceType[SHOGI_KNIGHT] = GOLD;
         return v;
     }
-    Variant* atomicshogi_variant() {
-        Variant* v = shogi_variant();
-        v->variantTemplate = "atomic";
-        v->remove_piece(KING);
-        v->add_piece(COMMONER, 'k');
-        v->extinctionValue = -VALUE_MATE;
-        v->extinctionPieceTypes = {COMMONER};
-        v->blastOnCapture = true;
-        return v;
-    }
     Variant* capablanca_variant() {
         Variant* v = chess_variant();
         v->pieceToCharTable = "PNBRQ..AC............Kpnbrq..ac............k";
@@ -1028,8 +1017,7 @@ void VariantMap::init() {
     add("threekings", threekings_variant()->conclude());
     add("horde", horde_variant()->conclude());
     add("nocheckatomic", nocheckatomic_variant()->conclude());
-    add("atomic", nocheckatomic_variant()->conclude());
-    add("atomichouse", atomichouse_variant()->conclude());
+    add("atomic", atomic_variant()->conclude());
     add("3check", threecheck_variant()->conclude());
     add("5check", fivecheck_variant()->conclude());
     add("crazyhouse", crazyhouse_variant()->conclude());
@@ -1061,7 +1049,6 @@ void VariantMap::init() {
     add("minixiangqi", minixiangqi_variant()->conclude());
 #ifdef LARGEBOARDS
     add("shogi", shogi_variant()->conclude());
-    add("atomicshogi", atomicshogi_variant()->conclude());
     add("capablanca", capablanca_variant()->conclude());
     add("capahouse", capahouse_variant()->conclude());
     add("caparandom", caparandom_variant()->conclude());

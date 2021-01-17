@@ -948,7 +948,7 @@ bool Position::legal(Move m) const {
   if (type_of(m) == CASTLING)
   {
       // Non-royal pieces can not be impeded from castling
-      if (type_of(piece_on(from)) != KING)
+      if (type_of(piece_on(from)) != KING && !var->extinctionPseudoRoyal)
           return true;
 
       // After castling, the rook and king final positions are the same in
@@ -959,6 +959,10 @@ bool Position::legal(Move m) const {
       for (Square s = to; s != from; s += step)
           if (attackers_to(s, ~us))
               return false;
+
+      // TODO: need to consider touching kings
+      if (var->extinctionPseudoRoyal && attackers_to(from, ~us))
+          return false;
 
       // Will the gate be blocked by king or rook?
       Square rto = to + (to_sq(m) > from_sq(m) ? WEST : EAST);
