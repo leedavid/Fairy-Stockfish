@@ -876,6 +876,13 @@ namespace {
             else
                 // Direct extinction threats
                 score += make_score(1000, 1000) / (denom * denom) * popcount(bExt & pos.pieces(Them, pt));
+
+            // Danger of remaining pieces
+            if (pos.blast_on_capture())
+            {
+                int escapes = popcount(attackedBy[Them][pt] & ~attackedBy[Us][ALL_PIECES]) * denom + 1;
+                score += make_score(5000 / (escapes * escapes), 0);
+            }
         }
     }
 
