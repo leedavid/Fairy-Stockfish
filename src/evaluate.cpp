@@ -880,8 +880,9 @@ namespace {
             // Danger of remaining pieces
             if (pos.blast_on_capture())
             {
-                int escapes = popcount(attackedBy[Them][pt] & ~attackedBy[Us][ALL_PIECES]) * denom + 1;
-                score += make_score(5000 / (escapes * escapes), 0);
+                int evasions = popcount(((attackedBy[Them][pt] & ~pos.pieces(Them)) | pos.pieces(Them, pt)) & ~attackedBy[Us][ALL_PIECES]) * denom + 1;
+                int attacks = popcount((attackedBy[Them][pt] | pos.pieces(Them, pt)) & attackedBy[Us][ALL_PIECES]);
+                score += make_score(2000 * attacks / (evasions * evasions), 0);
             }
         }
     }
