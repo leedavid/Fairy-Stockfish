@@ -255,6 +255,7 @@ public:
   void undo_null_move();
 
   // Static Exchange Evaluation
+  Value blast_see(Move m) const;
   bool see_ge(Move m, Value threshold = VALUE_ZERO) const;
 
   // Accessing hash keys

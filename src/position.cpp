@@ -1932,6 +1932,53 @@ Key Position::key_after(Move m) const {
 }
 
 
+Value Position::blast_see(Move m) const {
+  assert(is_ok(m));
+
+  Square from = from_sq(m);
+  Square to = to_sq(m);
+  Color us = color_of(moved_piece(m));
+  Bitboard fromto = type_of(m) == DROP ? square_bb(to) : from | to;
+  Bitboard blast = ((attacks_bb<KING>(to) & ~pieces(PAWN)) | fromto) & pieces();
+
+  Value result = VALUE_ZERO;
+
+  // Add the least valuable attacker for quiet moves
+  if (!capture(m))
+  {
+      Bitboard attackers = attackers_to(to, pieces() ^ fromto, ~us);
+      Value minAttacker = VALUE_INFINITE;
+
+      while (attackers)
+      {
+          Square s = pop_lsb(&attackers);
+          if (extinction_piece_types().find(type_of(piece_on(s))) == extinction_piece_types().end())
+              minAttacker = std::min(minAttacker, blast & s ? VALUE_ZERO : PieceValue[MG][piece_on(s)]);
+      }
+
+      if (minAttacker == VALUE_INFINITE)
+          return VALUE_ZERO;
+
+      result += minAttacker;
+      if (type_of(m) == DROP)
+          result -= PieceValue[MG][dropped_piece_type(m)];
+  }
+
+  // Sum up blast piece values
+  while (blast)
+  {
+      Piece bpc = piece_on(pop_lsb(&blast));
+      if (extinction_piece_types().find(type_of(bpc)) != extinction_piece_types().end())
+          return color_of(bpc) == us ?  extinction_value()
+                        : capture(m) ? -extinction_value()
+                                     : VALUE_ZERO;
+      result += color_of(bpc) == us ? -PieceValue[MG][bpc] : PieceValue[MG][bpc];
+  }
+
+  return capture(m) || must_capture() ? result - 1 : std::min(result, VALUE_ZERO);
+}
+
+
 /// Position::see_ge (Static Exchange Evaluation Greater or Equal) tests if the
 /// SEE value of move is greater or equal to the given threshold. We'll use an
 /// algorithm similar to alpha-beta pruning with a null window.
@@ -1945,9 +1992,14 @@ bool Position::see_ge(Move m, Value threshold) const {
       return VALUE_ZERO >= threshold;
 
   Square from = from_sq(m), to = to_sq(m);
+
   // nCheck
   if (check_counting() && color_of(moved_piece(m)) == sideToMove && gives_check(m))
       return true;
+
+  // Atomic
+  if (blast_on_capture())
+      return blast_see(m) >= threshold;
 
   // Extinction
   if (   extinction_value() != VALUE_NONE
@@ -1959,7 +2011,7 @@ bool Position::see_ge(Move m, Value threshold) const {
       return extinction_value() < VALUE_ZERO;
 
   // Do not evaluate SEE if value would be unreliable
-  if (blast_on_capture() || must_capture() || !checking_permitted() || is_gating(m) || count<CLOBBER_PIECE>() == count<ALL_PIECES>())
+  if (must_capture() || !checking_permitted() || is_gating(m) || count<CLOBBER_PIECE>() == count<ALL_PIECES>())
       return VALUE_ZERO >= threshold;
 
   int swap = PieceValue[MG][piece_on(to)] - threshold;
