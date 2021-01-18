@@ -865,25 +865,23 @@ namespace {
             // Explosion threats
             if (pos.blast_on_capture())
             {
+                int evasions = popcount(((attackedBy[Them][pt] & ~pos.pieces(Them)) | pos.pieces(Them, pt)) & ~attackedBy[Us][ALL_PIECES]) * denom;
+                int attacks = popcount((attackedBy[Them][pt] | pos.pieces(Them, pt)) & attackedBy[Us][ALL_PIECES]);
+                int explosions = 0;
+
                 Bitboard bExtBlast = bExt & (attackedBy2[Us] | ~attackedBy[Us][pt]);
                 while (bExtBlast)
                 {
                     Square s = pop_lsb(&bExtBlast);
                     if (((attacks_bb<KING>(s) | s) & pos.pieces(Them, pt)) && !(attacks_bb<KING>(s) & pos.pieces(Us, pt)))
-                        score += make_score(1500, 200) / (denom * denom);
+                        explosions++;
                 }
+                int danger = 10 * attacks / (evasions * evasions + 1) + 20 * explosions;
+                score += make_score(danger * (100 + danger), 0);
             }
             else
                 // Direct extinction threats
                 score += make_score(1000, 1000) / (denom * denom) * popcount(bExt & pos.pieces(Them, pt));
-
-            // Danger of remaining pieces
-            if (pos.blast_on_capture())
-            {
-                int evasions = popcount(((attackedBy[Them][pt] & ~pos.pieces(Them)) | pos.pieces(Them, pt)) & ~attackedBy[Us][ALL_PIECES]) * denom;
-                int attacks = popcount((attackedBy[Them][pt] | pos.pieces(Them, pt)) & attackedBy[Us][ALL_PIECES]);
-                score += make_score(2000 * attacks / (evasions * evasions + 1), 0);
-            }
         }
     }
 
