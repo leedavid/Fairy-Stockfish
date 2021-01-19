@@ -290,7 +290,7 @@ namespace {
         return v;
     }
     // Atomic chess without checks (ICC rules)
-    // https://en.wikipedia.org/wiki/Atomic_chess
+    // https://www.chessclub.com/help/atomic
     Variant* nocheckatomic_variant() {
         Variant* v = fairy_variant_base();
         v->variantTemplate = "atomic";
@@ -301,9 +301,11 @@ namespace {
         v->blastOnCapture = true;
         return v;
     }
+    // Atomic chess
+    // https://en.wikipedia.org/wiki/Atomic_chess
     Variant* atomic_variant() {
         Variant* v = nocheckatomic_variant();
-        // TODO: castling, check(-mate), stalemate
+        // TODO: castling, check(-mate), stalemate are not yet properly implemented
         v->extinctionPseudoRoyal = true;
         return v;
     }

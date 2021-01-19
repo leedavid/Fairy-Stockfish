@@ -2001,7 +2001,7 @@ bool Position::see_ge(Move m, Value threshold) const {
   if (check_counting() && color_of(moved_piece(m)) == sideToMove && gives_check(m))
       return true;
 
-  // Atomic
+  // Atomic explosion SEE
   if (blast_on_capture())
       return blast_see(m) >= threshold;
 

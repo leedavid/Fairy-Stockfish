@@ -113,7 +113,7 @@ struct Variant {
   bool bikjangRule = false;
   Value extinctionValue = VALUE_NONE;
   bool extinctionClaim = false;
-  bool extinctionPseudoRoyal = false;
+  bool extinctionPseudoRoyal = false; // TODO: implementation incomplete
   std::set<PieceType> extinctionPieceTypes = {};
   int extinctionPieceCount = 0;
   int extinctionOpponentPieceCount = 0;
