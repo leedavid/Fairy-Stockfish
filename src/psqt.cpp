@@ -132,7 +132,7 @@ void init(const Variant* v) {
       {
           score -= make_score(0, (QueenValueEg - maxPromotion) / 100);
           if (v->blastOnCapture)
-              score += score / 2;
+              score += score;
       }
 
       // Scale slider piece values with board size
