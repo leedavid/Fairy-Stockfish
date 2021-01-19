@@ -874,7 +874,7 @@ namespace {
                 {
                     Square s = pop_lsb(&bExtBlast);
                     if (((attacks_bb<KING>(s) | s) & pos.pieces(Them, pt)) && !(attacks_bb<KING>(s) & pos.pieces(Us, pt)))
-                        explosions++;
+                        attacks += 2;
                 }
                 int danger = 20 * attacks / (evasions + 1) + 40 * explosions;
                 score += make_score(danger * (100 + danger), 0);
