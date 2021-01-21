@@ -180,7 +180,7 @@ void init(const Variant* v) {
       else if (   v->extinctionValue == -VALUE_MATE
                && v->extinctionPieceCount == 0
                && v->extinctionPieceTypes.find(ALL_PIECES) != v->extinctionPieceTypes.end())
-          score += make_score(0, std::max(KnightValueEg - PieceValue[EG][pt], VALUE_ZERO) / 20);
+          score += make_score(0, PieceValue[EG][pt] / 10);
       else if (pt == strongestPiece)
               score += make_score(std::max(QueenValueMg - PieceValue[MG][pt], VALUE_ZERO) / 20,
                                   std::max(QueenValueEg - PieceValue[EG][pt], VALUE_ZERO) / 20);
