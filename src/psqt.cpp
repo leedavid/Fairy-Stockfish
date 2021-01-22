@@ -169,6 +169,9 @@ void init(const Variant* v) {
       else if (!v->checking)
           score = make_score(mg_value(score) * 2000 / (3500 + mg_value(score)),
                              eg_value(score) * 2700 / (4000 + eg_value(score)));
+      else if (v->flagPiece)
+          score = make_score(mg_value(score) * 11000 / (10000 + mg_value(score)),
+                             eg_value(score) * (10000 + eg_value(score)) / 11000);
       else if (v->twoBoards)
           score = make_score(mg_value(score) * 7000 / (7000 + mg_value(score)),
                              eg_value(score) * 7000 / (7000 + eg_value(score)));
