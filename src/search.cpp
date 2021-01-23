@@ -1325,7 +1325,11 @@ moves_loop: // When in check, search starts from here
                              + (*contHist[0])[history_slot(movedPiece)][to_sq(move)]
                              + (*contHist[1])[history_slot(movedPiece)][to_sq(move)]
                              + (*contHist[3])[history_slot(movedPiece)][to_sq(move)]
-                             - 5287;
+                             - 5287
+                             - 1000 * pos.blast_on_capture()
+                             - 1000 * pos.captures_to_hand()
+                             + 1000 * pos.check_counting()
+                             + 500 * pos.must_capture();
 
               // Decrease/increase reduction by comparing opponent's stat score (~10 Elo)
               if (ss->statScore >= -105 && (ss-1)->statScore < -103)
