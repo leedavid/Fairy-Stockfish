@@ -1335,7 +1335,7 @@ moves_loop: // When in check, search starts from here
                   r++;
 
               // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
-              r -= ss->statScore / (14884 - 4434 * pos.captures_to_hand());
+              r -= ss->statScore / (14884 - 5000 * pos.captures_to_hand() - 1000 * pos.blast_on_capture() + 1500 * pos.must_capture() - 1000 * pos.check_counting());
           }
           else
           {
