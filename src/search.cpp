@@ -1152,7 +1152,7 @@ moves_loop: // When in check, search starts from here
                   &&  (*contHist[0])[history_slot(movedPiece)][to_sq(move)]
                     + (*contHist[1])[history_slot(movedPiece)][to_sq(move)]
                     + (*contHist[3])[history_slot(movedPiece)][to_sq(move)]
-                    + (*contHist[5])[history_slot(movedPiece)][to_sq(move)] / 2 < 27376 - 1000 * pos.check_counting() + 500 * (pos.extinction_value() != VALUE_NONE) + 500 * pos.captures_to_hand() + 500 * pos.blast_on_capture())
+                    + (*contHist[5])[history_slot(movedPiece)][to_sq(move)] / 2 < 27376 + 1000 * pos.check_counting() - 500 * (pos.extinction_value() != VALUE_NONE) - 500 * pos.captures_to_hand() - 500 * pos.blast_on_capture())
                   continue;
 
               // Prune moves with negative SEE (~20 Elo)
