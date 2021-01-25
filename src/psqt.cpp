@@ -173,7 +173,7 @@ void init(const Variant* v) {
           score = make_score(mg_value(score) * 7000 / (7000 + mg_value(score)),
                              eg_value(score) * 7000 / (7000 + eg_value(score)));
       else if (v->blastOnCapture)
-          score = make_score(mg_value(score) * 7000 / (7000 + mg_value(score)), eg_value(score));
+          score = make_score(mg_value(score) * (10000 + mg_value(score)) / 11000, eg_value(score));
       else if (v->checkCounting)
           score = make_score(mg_value(score) * (20000 + mg_value(score)) / 22000,
                              eg_value(score) * (20000 + eg_value(score)) / 21000);
