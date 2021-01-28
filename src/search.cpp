@@ -1168,7 +1168,7 @@ moves_loop: // When in check, search starts from here
                   continue;
 
               // SEE based pruning
-              if (!pos.see_ge(move, Value(-213 - 120 * pos.captures_to_hand()) * depth)) // (~25 Elo)
+              if (!pos.see_ge(move, Value(-213 - 120 * pos.captures_to_hand() - 50 * (pos.extinction_value() != VALUE_NONE)) * depth)) // (~25 Elo)
                   continue;
           }
       }
