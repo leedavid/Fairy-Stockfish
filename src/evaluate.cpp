@@ -877,7 +877,7 @@ namespace {
                         explosions++;
                 }
                 int danger = 20 * attacks / (evasions + 1) + 40 * explosions;
-                score += make_score(danger * (100 + danger), 0);
+                score += make_score(danger * (100 + danger), danger * 10);
             }
             else
                 // Direct extinction threats
