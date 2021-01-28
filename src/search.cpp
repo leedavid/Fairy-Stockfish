@@ -917,6 +917,21 @@ namespace {
     if (pos.must_capture() && pos.has_capture())
         goto moves_loop;
 
+    // Very slow threat detection
+    if (pos.blast_on_capture())
+    {
+        Bitboard blastThreats = 0;
+        for (PieceType pt : pos.extinction_piece_types())
+            if (pos.count(pos.side_to_move(), pt) == 1)
+                blastThreats |= attacks_bb<KING>(lsb(pos.pieces(pos.side_to_move(), pt))) & pos.pieces(pos.side_to_move());
+        while (blastThreats)
+        {
+            Square s = pop_lsb(&blastThreats);
+            if (pos.attackers_to(s, ~pos.side_to_move()))
+                goto moves_loop;
+        }
+    }
+
     // Step 8. Futility pruning: child node (~50 Elo)
     if (   !PvNode
         &&  depth < 8
