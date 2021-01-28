@@ -867,6 +867,7 @@ namespace {
             {
                 int evasions = popcount(((attackedBy[Them][pt] & ~pos.pieces(Them)) | pos.pieces(Them, pt)) & ~attackedBy[Us][ALL_PIECES]) * denom;
                 int attacks = popcount((attackedBy[Them][pt] | pos.pieces(Them, pt)) & attackedBy[Us][ALL_PIECES]);
+                int potentialAttacks = popcount(pos.pieces(Them, pt) & attackedBy[Us][ALL_PIECES]);
                 int explosions = 0;
 
                 Bitboard bExtBlast = bExt & (attackedBy2[Us] | ~attackedBy[Us][pt]);
@@ -876,7 +877,7 @@ namespace {
                     if (((attacks_bb<KING>(s) | s) & pos.pieces(Them, pt)) && !(attacks_bb<KING>(s) & pos.pieces(Us, pt)))
                         explosions++;
                 }
-                int danger = 20 * attacks / (evasions + 1) + 40 * explosions;
+                int danger = 20 * attacks / (evasions + 1) + 40 * explosions + 10 * potentialAttacks / (evasions + 1);
                 score += make_score(danger * (100 + danger), 0);
             }
             else
