@@ -876,8 +876,8 @@ namespace {
                     if (((attacks_bb<KING>(s) | s) & pos.pieces(Them, pt)) && !(attacks_bb<KING>(s) & pos.pieces(Us, pt)))
                         explosions++;
                 }
-                int danger = 20 * attacks / (evasions + 1) + 40 * explosions;
-                score += make_score(danger * (100 + danger), 0);
+                int danger = 30 * attacks / (evasions + 1) + 50 * explosions;
+                score += make_score(danger * danger * 100 / (100 + danger), 0);
             }
             else
                 // Direct extinction threats
