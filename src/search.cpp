@@ -923,7 +923,10 @@ namespace {
         Bitboard blastThreats = 0;
         for (PieceType pt : pos.extinction_piece_types())
             if (pos.count(pos.side_to_move(), pt) == 1)
-                blastThreats |= attacks_bb<KING>(lsb(pos.pieces(pos.side_to_move(), pt))) & pos.pieces(pos.side_to_move());
+            {
+                Square s = lsb(pos.pieces(pos.side_to_move(), pt));
+                blastThreats |= (attacks_bb<KING>(s) & pos.pieces(pos.side_to_move())) | s;
+            }
         while (blastThreats)
         {
             Square s = pop_lsb(&blastThreats);
